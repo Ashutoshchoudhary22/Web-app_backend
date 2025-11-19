@@ -1,5 +1,5 @@
 import Fastify from "fastify";
-import cors from "@fastify/cors";
+import cors, { type FastifyCorsOptions } from "@fastify/cors";
 import { env } from "./env.js";
 import { registerHealthRoutes } from "./routes/health.js";
 import { registerLinkRoutes } from "./routes/links.js";
@@ -10,7 +10,7 @@ export function buildServer() {
     logger: true
   });
 
-  const corsOrigin =
+  const corsOrigin: FastifyCorsOptions["origin"] =
     env.FRONTEND_ORIGIN === "*"
       ? true
       : createOriginMatcher(env.FRONTEND_ORIGIN);
@@ -27,7 +27,9 @@ export function buildServer() {
   return app;
 }
 
-function createOriginMatcher(originConfig: string) {
+function createOriginMatcher(
+  originConfig: string
+): NonNullable<FastifyCorsOptions["origin"]> {
   const allowedOrigins = new Set(
     originConfig
       .split(",")
@@ -35,7 +37,7 @@ function createOriginMatcher(originConfig: string) {
       .filter(Boolean)
   );
 
-  return (origin: string | undefined, cb: (err: Error | null, allow?: boolean) => void) => {
+  return (origin, cb) => {
     if (!origin || allowedOrigins.has(origin)) {
       cb(null, true);
       return;
