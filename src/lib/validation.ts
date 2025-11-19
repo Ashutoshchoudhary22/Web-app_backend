@@ -4,7 +4,8 @@ export const codeRegex = /^[A-Za-z0-9]{6,8}$/;
 
 export const createLinkSchema = z.object({
   url: z
-    .string({ required_error: "Target URL is required" })
+    .string()
+    .nonempty("Target URL is required")
     .url("Enter a valid URL (https://...)")
     .max(2048, "URL is too long"),
   code: z
