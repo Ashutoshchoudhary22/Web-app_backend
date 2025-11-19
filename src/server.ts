@@ -10,13 +10,13 @@ export function buildServer() {
     logger: true
   });
 
-  const allowedOrigins =
+  const corsOrigin =
     env.FRONTEND_ORIGIN === "*"
       ? true
-      : env.FRONTEND_ORIGIN.split(",").map((origin) => origin.trim());
+      : createOriginMatcher(env.FRONTEND_ORIGIN);
 
   app.register(cors, {
-    origin: allowedOrigins,
+    origin: corsOrigin,
     credentials: true
   });
 
@@ -25,5 +25,23 @@ export function buildServer() {
   app.register(registerRedirectRoute);
 
   return app;
+}
+
+function createOriginMatcher(originConfig: string) {
+  const allowedOrigins = new Set(
+    originConfig
+      .split(",")
+      .map((origin) => origin.trim())
+      .filter(Boolean)
+  );
+
+  return (origin: string | undefined, cb: (err: Error | null, allow?: boolean) => void) => {
+    if (!origin || allowedOrigins.has(origin)) {
+      cb(null, true);
+      return;
+    }
+
+    cb(new Error(`Origin "${origin}" is not allowed by CORS`), false);
+  };
 }
 
